@@ -8,9 +8,9 @@ class ResStemIN(nn.Module):
 
     def __init__(self, w_in, w_out):
         super(ResStemIN, self).__init__()
-        self._construct(w_in, w_out)
+        self._construct2(w_in, w_out)
 
-    def _construct(self, w_in, w_out):
+    def _construct2(self, w_in, w_out):
         # 7x7, BN, ReLU, maxpool
         self.conv = nn.Conv2d(
             w_in, w_out, kernel_size=7, stride=2, padding=3, bias=False
@@ -30,9 +30,9 @@ class SimpleStemIN(nn.Module):
 
     def __init__(self, in_w, out_w):
         super(SimpleStemIN, self).__init__()
-        self._construct(in_w, out_w)
+        self._construct2(in_w, out_w)
 
-    def _construct(self, in_w, out_w):
+    def _construct2(self, in_w, out_w):
         # 3x3, BN, ReLU
         self.conv = nn.Conv2d(
             in_w, out_w, kernel_size=3, stride=2, padding=1, bias=False
@@ -51,9 +51,9 @@ class SE(nn.Module):
 
     def __init__(self, w_in, w_se):
         super(SE, self).__init__()
-        self._construct(w_in, w_se)
+        self._construct2(w_in, w_se)
 
-    def _construct(self, w_in, w_se):
+    def _construct2(self, w_in, w_se):
         # AvgPool
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         # FC, Activation, FC, Sigmoid
@@ -73,9 +73,9 @@ class BottleneckTransform(nn.Module):
 
     def __init__(self, w_in, w_out, stride, bm, gw, se_r):
         super(BottleneckTransform, self).__init__()
-        self._construct(w_in, w_out, stride, bm, gw, se_r)
+        self._construct2(w_in, w_out, stride, bm, gw, se_r)
 
-    def _construct(self, w_in, w_out, stride, bm, gw, se_r):
+    def _construct2(self, w_in, w_out, stride, bm, gw, se_r):
         # Compute the bottleneck width
         w_b = int(round(w_out * bm))
         # Compute the number of groups
@@ -110,7 +110,7 @@ class ResBottleneckBlock(nn.Module):
 
     def __init__(self, w_in, w_out, stride, bm=1.0, gw=1, se_r=None):
         super(ResBottleneckBlock, self).__init__()
-        self._construct(w_in, w_out, stride, bm, gw, se_r)
+        self._construct2(w_in, w_out, stride, bm, gw, se_r)
 
     def _add_skip_proj(self, w_in, w_out, stride):
         self.proj = nn.Conv2d(
@@ -118,7 +118,7 @@ class ResBottleneckBlock(nn.Module):
         )
         self.bn = nn.BatchNorm2d(w_out)
 
-    def _construct(self, w_in, w_out, stride, bm, gw, se_r):
+    def _construct2(self, w_in, w_out, stride, bm, gw, se_r):
         # Use skip connection with projection if shape changes
         self.proj_block = (w_in != w_out) or (stride != 1)
         if self.proj_block:
@@ -155,9 +155,9 @@ class AnyStage(nn.Module):
 
     def __init__(self, w_in, w_out, stride, d, block_fun, bm, gw, se_r):
         super(AnyStage, self).__init__()
-        self._construct(w_in, w_out, stride, d, block_fun, bm, gw, se_r)
+        self._construct2(w_in, w_out, stride, d, block_fun, bm, gw, se_r)
 
-    def _construct(self, w_in, w_out, stride, d, block_fun, bm, gw, se_r):
+    def _construct2(self, w_in, w_out, stride, d, block_fun, bm, gw, se_r):
         # Construct the blocks
         for i in range(d):
             # Stride and w_in apply to the first block of the stage
@@ -180,7 +180,7 @@ class AnyNet(nn.Module):
     def __init__(self, **kwargs):
         super(AnyNet, self).__init__()
         if kwargs:
-            self._construct(
+            self._construct2(
                 stem_w=kwargs["stem_w"],
                 ds=kwargs["ds"],
                 ws=kwargs["ws"],
@@ -206,7 +206,7 @@ class AnyNet(nn.Module):
                 m.bias.data.zero_()
         # self.macs, self.params = self._get_flops()
 
-    def _construct(self, stem_w, ds, ws, ss, bms, gws, se_r, nc):
+    def _construct2(self, stem_w, ds, ws, ss, bms, gws, se_r, nc):
         # logger.info("Constructing AnyNet: ds={}, ws={}".format(ds, ws))
         # Generate dummy bot muls and gs for models that do not use them
         bms = bms if bms else [1.0 for _d in ds]

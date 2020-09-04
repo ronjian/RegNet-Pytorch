@@ -1,5 +1,7 @@
 import numpy as np
-from models.reglayers import AnyNet, WrappedModel
+# import sys; sys.path.append("/workspace/RegNet-Pytorch/ImageNet/")
+# from models.reglayers import AnyNet, WrappedModel
+from reglayers import AnyNet, WrappedModel
 import torch
 
 regnet_200M_config = {'WA': 36.44, 'W0': 24, 'WM': 2.49, 'DEPTH': 13, 'GROUP_W': 8, 'BOT_MUL': 1}
@@ -130,8 +132,9 @@ def regnet_1600M(pretrained=False, **kwargs):
     model = RegNet(regnet_1600M_config, **kwargs)
     if pretrained:
         model = WrappedModel(model)
-        state_dict = torch.load(model_paths['regnet_1600m'])
-        model.load_state_dict(state_dict)
+        if os.path.exists(model_paths['regnet_1600m']):
+            state_dict = torch.load(model_paths['regnet_1600m'])
+            model.load_state_dict(state_dict)
     return model
 
 
@@ -160,3 +163,17 @@ def regnet_6400M(pretrained=False, **kwargs):
         state_dict = torch.load(model_paths['regnet_6400m'])
         model.load_state_dict(state_dict)
     return model
+
+
+if __name__ == "__main__":
+    import os; os.environ['CUDA_VISIBLE_DEVICES'] = ''
+    net = regnet_6400M(pretrained=False)
+    net.eval()
+    x = torch.Tensor(1,3,224,224)
+    _ = net(x)
+
+    trace_model = torch.jit.trace(net, x)
+    trace_model.save("/workspace/RegNet-Pytorch/ImageNet/ckpts/regnet_6400M.jit")
+    print('done')
+
+    
